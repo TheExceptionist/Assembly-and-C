@@ -69,6 +69,38 @@ MathTest proc
 
 	ret
 MathTest endp
+
+
+JumpTest proc
+	;Jump instruction
+	jmp MainLoop + 23
+
+	;Compare
+	mov ecx, 98
+	mov edx, 56
+	cmp ecx, edx
+	jl MainLoop
+
+;Label
+MainLoop:
+	dec ecx
+	jne MainLoop
+
+	ret
+JumpTest endp
+
+
+;params
+;1st RCX
+;2nd RDX
+;3rd R8
+;4th R9
+;>4 Stack
+IntegerTest proc
+	mov eax, ecx
+	neg eax
+	ret
+IntegerTest endp
 end
 
 ;Changing bx
