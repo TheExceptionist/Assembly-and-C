@@ -2,6 +2,7 @@
 firstByte db 78 ;define byte somewhere in RAM
 firstWord dw ? ;? to uninitialized variable
 firstReal real4 89.5
+firstQWord sqword 0
 
 .code
 SomeFunction proc
@@ -19,13 +20,55 @@ RegTest proc
 	mov r11, -10
 	mov r11b, 50
 	mov r11w, 66
-	mov r11d, 1 ;op on 32bit reg zeroes the rest of the 64bit
+	mov r11d, 1                    ;op on 32bit reg zeroes the rest of the 64bit
 	ret
 RegTest endp
 
 ByteTest proc
+	mov al, firstByte               ;mov the value of firstByte into al
+									;ASM has no type safety
+									
+	mov eax, real4 ptr [firstReal] ;another way to move a value into an address
+
+									;these byte will be executed like machine code
+	;db 45, 78, 19, 23				 adds to 64bits - is very exact
+
 	ret
 ByteTest endp
+
+MovTest proc
+	mov rax, 89
+	mov cx, ax
+	mov firstByte, cl ; address to memory
+	mov al, firstByte ;memory to address 
+					  ;no memory to memory 
+
+	lea rax, firstByte ;load pointer into a register
+						;Pointers are 64bit so entire reg is used
+
+	mov byte ptr[rax], 7 ;move 7 into whatever rax points to (mem write)
+
+	ret
+MovTest endp
+
+MathTest proc
+	mov rax, 5
+	mov rcx, 12
+	add rax, rcx ;get 17 store in  rax
+
+	xor rcx, rcx ; zero rcx
+	mov rax, 2147483648   ;add rcx, 2147483648 64bit add doesn't work as intended (signed bit), results in teh two's complement of thsi number
+	add rcx, rax
+	mov firstQWord, rcx
+
+	mov al, 255 ;unsigned overflow byte can't go past 255
+	inc al      ;carry flag isn't set with inc, used add
+
+	mov al, 0
+	dec al ;underflow just like above carry flag is unaffected
+
+	ret
+MathTest endp
 end
 
 ;Changing bx
